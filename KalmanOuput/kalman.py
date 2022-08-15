@@ -131,9 +131,12 @@ import matplotlib.pyplot as plt
 
 x_last = 0
 p_last = 0
-Q = 0.1  #系统噪声
-R = 0.5  #测量噪声
+Q = 0.018  #系统噪声
+R = 0.0542  #测量噪声
 
+#--------------------------------------------------------#
+# 一维卡尔曼滤波算法，需要提前指定x_last和p_last,
+#--------------------------------------------------------#
 def OneDimen_Kalman(z_measure,x_last=0,p_last=0,Q=0.018,R=0.0542):
     x_mid = x_last
     p_mid = p_last + Q
@@ -144,15 +147,15 @@ def OneDimen_Kalman(z_measure,x_last=0,p_last=0,Q=0.018,R=0.0542):
     x_last = x_now
     return x_now,p_last,x_last
     
-real = np.sin(np.linspace(0,10,100))
-chao = np.random.rand(100)-0.5
-x = real+chao
-y = []
-for i in range(len(x)):
-    pred,p_last,x_last = OneDimen_Kalman(x[i],x_last,p_last,Q,R)
-    y.append(pred)
+# real = np.sin(np.linspace(0,10,100))
+# chao = np.random.rand(100)-0.5
+# x = real+chao
+# y = []
+# for i in range(len(x)):
+#     pred,p_last,x_last = OneDimen_Kalman(x[i],x_last,p_last,Q,R)
+#     y.append(pred)
     
-plt.plot(real,color="b")  #真实值
-plt.plot(x,color="g")     #测量值
-plt.plot(y,color="r")     #预测值
-plt.show()
+# plt.plot(real,color="b")  #真实值
+# plt.plot(x,color="g")     #测量值
+# plt.plot(y,color="r")     #预测值
+# plt.show()

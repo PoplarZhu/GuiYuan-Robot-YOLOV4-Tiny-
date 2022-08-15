@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from PIL import Image
+from KalmanOuput import kalman
 
 from yolo import YOLO
 
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     #   crop、count仅在mode='predict'时有效
     #-------------------------------------------------------------------------#
     crop            = False
-    count           = False
+    count           = True
     #----------------------------------------------------------------------------------------------------------#
     #   video_path          用于指定视频的路径，当video_path=0时表示检测摄像头
     #                       想要检测视频，则设置如video_path = "xxx.mp4"即可，代表读取出根目录下的xxx.mp4文件。
@@ -71,8 +72,17 @@ if __name__ == "__main__":
     simplify        = True
     onnx_save_path  = "model_data/models.onnx"
 
+
+    #-------------------------------------------------------------------------#
+    #  卡尔曼滤波调试参数
+    #-------------------------------------------------------------------------#
     writer = SummaryWriter("center_floating")
     datetime_object = 0
+    xlast_kalman = [0, 0]
+    plast_kalman = [0, 0]
+    OptimValue_X = yolo.center_x
+    OptimValue_Y = yolo.center_y
+
 
     if mode == "predict":
         '''
@@ -135,15 +145,18 @@ if __name__ == "__main__":
             if c==27:
                 capture.release()
                 break
-            print(yolo.center_x, yolo.center_y)
-            if  datetime_object <= 500:
-                 writer.add_scalar("center_x floating", yolo.center_x, datetime_object)
-                 writer.add_scalar("center_y floating", yolo.center_y, datetime_object)
+            # print(yolo.center_x, yolo.center_y)
+            OptimValue_X , plast_kalman[0], xlast_kalman[0] = kalman.OneDimen_Kalman(yolo.center_x, xlast_kalman[0], plast_kalman[0])
+            OptimValue_Y , plast_kalman[1], xlast_kalman[1] = kalman.OneDimen_Kalman(yolo.center_y, xlast_kalman[1], plast_kalman[1])
+            if  datetime_object <= 300:
+                 writer.add_scalars("center_x floating", {'Kalman_x':OptimValue_X, 'Center_x':yolo.center_x}, datetime_object)
+                 writer.add_scalars("center_y floating", {'Kalman_y':OptimValue_Y, 'Center_y':yolo.center_y}, datetime_object)
+                 print("datetime_object循环次数为:{}".format(datetime_object))
                  
             else:
                 writer.close()
 
-            print("datetime_object循环次数为:{}".format(datetime_object))
+            # print("datetime_object循环次数为:{}".format(datetime_object))
             datetime_object += 1
 
         print("Video Detection Done!")

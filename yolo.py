@@ -121,7 +121,7 @@ class YOLO(object):
     #---------------------------------------------------#
     #   检测图片
     #---------------------------------------------------#
-    def detect_image(self, image, crop = False, count = False):
+    def detect_image(self, image, crop = False, count = True):
         image_shape = np.array(np.shape(image)[0:2])
         #---------------------------------------------------------#
         #   在这里将图像转换成RGB图像，防止灰度图在预测时报错。
